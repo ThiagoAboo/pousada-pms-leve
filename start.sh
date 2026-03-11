@@ -8,7 +8,7 @@ AZUL='\033[0;34m'
 VERMELHO='\033[0;31m'
 RESET='\033[0m'
 
-cd ~/pousada-pms
+cd ~/pousada-pms-leve
 
 echo -e "${AZUL}🌐 Iniciando servidor Flask na porta 5000...${RESET}"
 

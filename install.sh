@@ -18,7 +18,7 @@ pkg install -y python python-pip git wget nano
 # 2. Clonar o repositório (substitua pela URL do seu repositório)
 echo -e "${AMARELO}📂 Clonando repositório do GitHub...${RESET}"
 git clone https://github.com/ThiagoAboo/pousada-pms.git ~/pousada-pms
-cd ~/pousada-pms
+cd ~/pousada-pms-leve
 
 # 3. Instalar dependências Python
 echo -e "${AMARELO}🐍 Instalando dependências Python...${RESET}"
