@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pousada dos Sonhos - Consulta Airbnb</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #1e3c72;
+            --secondary-color: #2a5298;
+            --accent-color: #00b4d8;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .container {
+            max-width: 900px;
+        }
+        
+        .card {
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            border: none;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 0 !important;
+            padding: 25px;
+            border: none;
+        }
+        
+        .card-header h2 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            padding: 15px;
+            font-weight: 600;
+            font-size: 1.1em;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .btn-success {
+            background: #25D366;
+            border: none;
+            padding: 15px;
+            font-weight: 600;
+            border-radius: 10px;
+        }
+        
+        .btn-success:hover {
+            background: #128C7E;
+        }
+        
+        .result-card {
+            border-left: 4px solid var(--accent-color);
+            margin-bottom: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .suite-name {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+        
+        .suite-description {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .badge-available {
+            background: #d4edda;
+            color: #155724;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .badge-unavailable {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .price-original {
+            color: #666;
+            text-decoration: line-through;
+            font-size: 1.1em;
+        }
+        
+        .price-discount {
+            color: var(--accent-color);
+            font-weight: 700;
+            font-size: 1.8em;
+            line-height: 1.2;
+        }
+        
+        .price-note {
+            font-size: 0.85em;
+            color: #666;
+            font-style: italic;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .spinner-border {
+            width: 4rem;
+            height: 4rem;
+            color: var(--accent-color);
+        }
+        
+        .whatsapp-message {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #25D366;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+            padding: 12px;
+        }
+        
+        .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(0,180,216,0.25);
+        }
+        
+        .input-group-text {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 10px 0 0 10px;
+        }
+        
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            border-left: 4px solid #25D366;
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .btn-group-action {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn-group-action .btn {
+            flex: 1;
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            transition: all 0.3s;
+        }
+        
+        .btn-outline-primary:hover {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Notification -->
+    <div class="toast-notification" id="toast">
+        <i class="bi bi-check-circle-fill text-success me-2"></i>
+        <span id="toastMessage">Mensagem copiada!</span>
+    </div>
+
+    <div class="container">
+        <!-- Cabeçalho -->
+        <div class="text-center text-white mb-4">
+            <h1 class="display-4 fw-bold">🌊 Pousada dos Sonhos</h1>
+            <p class="lead">Costa Azul - Consulta de Disponibilidade em Tempo Real</p>
+        </div>
+        
+        <!-- Formulário de Consulta -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="h4 mb-0"><i class="bi bi-calendar-check me-2"></i>Nova Consulta</h2>
+            </div>
+            <div class="card-body p-4">
+                <form id="consultaForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-calendar-plus me-1"></i>Check-in
+                            </label>
+                            <input type="date" class="form-control" id="checkin" name="checkin" 
+                                   min="{{ today }}" value="{{ today }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-calendar-minus me-1"></i>Check-out
+                            </label>
+                            <input type="date" class="form-control" id="checkout" name="checkout" 
+                                   min="{{ tomorrow }}" value="{{ tomorrow }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-person-fill me-1"></i>Adultos
+                            </label>
+                            <input type="number" class="form-control" id="adultos" name="adultos" 
+                                   min="1" max="10" value="2" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-people-fill me-1"></i>Crianças
+                            </label>
+                            <input type="number" class="form-control" id="criancas" name="criancas" 
+                                   min="0" max="8" value="0">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-emoji-smile me-1"></i>Bebês
+                            </label>
+                            <input type="number" class="form-control" id="bebes" name="bebes" 
+                                   min="0" max="5" value="0">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-heart-fill me-1"></i>Pets
+                            </label>
+                            <input type="number" class="form-control" id="pets" name="pets" 
+                                   min="0" max="5" value="0">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i class="bi bi-percent me-1"></i>Desconto (%)
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-tag-fill"></i></span>
+                            <input type="number" class="form-control" id="desconto" name="desconto" 
+                                   min="0" max="50" step="0.1" value="12">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-2"></i>Consultar Disponibilidade
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <div class="spinner-border mb-3" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <h4>Consultando disponibilidade...</h4>
+            <p class="text-muted">Aguarde enquanto verificamos os preços no Airbnb</p>
+        </div>
+        
+        <!-- Resultados -->
+        <div id="results" style="display: none;">
+            <!-- Suites -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h4 mb-0"><i class="bi bi-house-heart-fill me-2"></i>Suítes</h2>
+                </div>
+                <div class="card-body p-4" id="resultsContent">
+                </div>
+            </div>
+            
+            <!-- Mensagem WhatsApp -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h4 mb-0"><i class="bi bi-whatsapp me-2"></i>Mensagem para WhatsApp</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="whatsapp-message" id="whatsappMessage"></div>
+                    
+                    <div class="btn-group-action">
+                        <button id="copyMessageBtn" class="btn btn-outline-success" onclick="copyMessage()">
+                            <i class="bi bi-files me-2"></i>Copiar Mensagem
+                        </button>
+                        
+                        <button id="shareWhatsAppBtn" class="btn btn-success" onclick="shareWhatsApp()">
+                            <i class="bi bi-whatsapp me-2"></i>Compartilhar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Rodapé -->
+        <div class="text-center text-white mt-4">
+            <small>© 2024 Pousada dos Sonhos - Consulta integrada Airbnb</small>
+        </div>
+    </div>
+    
+    <script>
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function copyMessage() {
+            const message = document.getElementById('whatsappMessage').textContent;
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(message).then(() => {
+                    showToast('✅ Mensagem copiada!');
+                });
+            } else {
+                const textarea = document.createElement('textarea');
+                textarea.value = message;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('✅ Mensagem copiada!');
+            }
+        }
+        
+        function shareWhatsApp() {
+            const message = document.getElementById('whatsappMessage').textContent;
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+        }
+        
+        function getTodayString() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        document.getElementById('consultaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Validar datas
+            const checkinStr = document.getElementById('checkin').value;
+            const checkoutStr = document.getElementById('checkout').value;
+            const todayStr = getTodayString();
+            
+            if (checkinStr < todayStr) {
+                alert('A data de check-in não pode ser no passado.');
+                return;
+            }
+            
+            if (checkoutStr <= checkinStr) {
+                alert('A data de check-out deve ser após o check-in.');
+                return;
+            }
+            
+            // Validar mínimo de 2 noites para fim de semana
+            const checkin = new Date(checkinStr + 'T00:00:00');
+            const checkout = new Date(checkoutStr + 'T00:00:00');
+            const dayOfWeek = checkin.getDay(); // 0=domingo, 5=sexta, 6=sábado
+            const nights = Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
+            
+            if ((dayOfWeek === 5 || dayOfWeek === 6) && nights < 2) {
+                alert('Reservas com check-in na sexta ou sábado exigem no mínimo 2 diárias.');
+                return;
+            }
+            
+            // Mostrar loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            
+            // Coletar dados do formulário
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch('/consultar', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Erro: ' + data.error);
+                    document.getElementById('loading').style.display = 'none';
+                    return;
+                }
+                
+                // Mostrar resultados
+                displayResults(data);
+                
+                // Esconder loading e mostrar resultados
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('results').style.display = 'block';
+                
+                // Scroll suave para os resultados
+                document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                alert('Erro ao consultar: ' + error);
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+        
+        function displayResults(data) {
+            const resultsContent = document.getElementById('resultsContent');
+            const whatsappMessage = document.getElementById('whatsappMessage');
+            
+            // Gerar HTML dos resultados - MOSTRA TODOS OS QUARTOS
+            let html = '';
+            
+            data.all_suites.forEach(suite => {
+                // Determinar a badge baseada na disponibilidade
+                let badgeHtml = '';
+                if (suite.available && suite.price > 0) {
+                    badgeHtml = `<div class="badge-available"><i class="bi bi-check-circle-fill me-1"></i>Disponível</div>`;
+                } else {
+                    badgeHtml = `<div class="badge-unavailable"><i class="bi bi-x-circle-fill me-1"></i>Indisponível</div>`;
+                }
+                
+                // Determinar o preço a mostrar
+                const precoOriginal = suite.price > 0 ? suite.price : 0;
+                const precoDesconto = suite.price_with_discount > 0 ? suite.price_with_discount : 0;
+                
+                // Construir notas adicionais
+                let notas = '';
+                if (suite.note) {
+                    notas += `<div class="price-note mb-2"><i class="bi bi-info-circle me-1"></i>${suite.note}</div>`;
+                }
+                if (suite.reason && !suite.available) {
+                    notas += `<div class="price-note mb-2"><i class="bi bi-exclamation-triangle me-1"></i>${suite.reason}</div>`;
+                }
+                if (suite.capacidade_excedida) {
+                    notas += `<div class="price-note mb-2"><i class="bi bi-exclamation-triangle me-1"></i>Capacidade máxima excedida para o número de hóspedes</div>`;
+                }
+                
+                html += `
+                    <div class="result-card">
+                        <div class="suite-name">🏨 ${suite.name}</div>
+                        <div class="suite-description">${suite.description}</div>
+                        ${badgeHtml}
+                        ${notas}
+                        <div class="row align-items-end">
+                            <div class="col-md-6">
+                                <div class="price-original">De: R$ ${precoOriginal.toFixed(2)}</div>
+                                <div class="price-discount">Por: R$ ${precoDesconto.toFixed(2)}</div>
+                            </div>
+                            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                                <a href="${suite.url}" target="_blank" class="btn btn-outline-primary">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i>Ver no Airbnb
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            resultsContent.innerHTML = html;
+            
+            // Mostrar mensagem WhatsApp
+            whatsappMessage.textContent = data.whatsapp_message;
+        }
+        
+        // Validação automática de datas
+        document.getElementById('checkin').addEventListener('change', function() {
+            const checkin = new Date(this.value + 'T00:00:00');
+            const checkout = new Date(document.getElementById('checkout').value + 'T00:00:00');
+            
+            if (checkout <= checkin) {
+                const nextDay = new Date(checkin);
+                nextDay.setDate(nextDay.getDate() + 1);
+                document.getElementById('checkout').value = nextDay.toISOString().split('T')[0];
+            }
+            
+            // Atualizar min do checkout
+            const nextDay = new Date(checkin);
+            nextDay.setDate(nextDay.getDate() + 1);
+            document.getElementById('checkout').min = nextDay.toISOString().split('T')[0];
+            
+            // Validar mínimo de 2 noites para fim de semana
+            const dayOfWeek = checkin.getDay();
+            const checkoutDate = new Date(document.getElementById('checkout').value + 'T00:00:00');
+            const nights = Math.ceil((checkoutDate - checkin) / (1000 * 60 * 60 * 24));
+            
+            if ((dayOfWeek === 5 || dayOfWeek === 6) && nights < 2) {
+                const newCheckout = new Date(checkin);
+                newCheckout.setDate(newCheckout.getDate() + 2);
+                document.getElementById('checkout').value = newCheckout.toISOString().split('T')[0];
+                document.getElementById('checkout').min = newCheckout.toISOString().split('T')[0];
+            }
+        });
+        
+        // Validação inicial ao carregar a página
+        window.addEventListener('load', function() {
+            const checkin = new Date(document.getElementById('checkin').value + 'T00:00:00');
+            const dayOfWeek = checkin.getDay();
+            
+            if (dayOfWeek === 5 || dayOfWeek === 6) {
+                const newCheckout = new Date(checkin);
+                newCheckout.setDate(newCheckout.getDate() + 2);
+                document.getElementById('checkout').value = newCheckout.toISOString().split('T')[0];
+                document.getElementById('checkout').min = newCheckout.toISOString().split('T')[0];
+            }
+        });
+    </script>
+</body>
+</html>
